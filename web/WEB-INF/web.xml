@@ -2,16 +2,13 @@
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <context-param>
         <param-name>dburl</param-name>
-        <param-value>jdbc:derby://localhost:1527/WEB;user=root;password=pass</param-value>
+        <param-value>jdbc:derby://localhost:1527/WEB;user=root;password=password</param-value>
     </context-param>
     <listener>
         <description>listener</description>
         <listener-class>listener.ContextListener</listener-class>
     </listener>
-    <listener>
-        <description>listener</description>
-        <listener-class>listener.ContextListener</listener-class>
-    </listener>
+   
     <servlet>
         <servlet-name>DBManager</servlet-name>
         <servlet-class>DB.DBManager</servlet-class>

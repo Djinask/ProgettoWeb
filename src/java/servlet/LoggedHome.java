@@ -64,7 +64,7 @@ public class LoggedHome extends HttpServlet {
             out.println("<body>");
             out.println("<div class=\"jumbotron\">");
             
-             out.println("<h1><span class=\"glyphicon glyphicon-lock\"></span>Benvenuto,  " + user.getName() + "!</h1>");
+             out.println("<h1><span class=\"glyphicon glyphicon-user\"></span>Benvenuto,  " + user.getName() + "!</h1>");
               out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
                 out.println("</div>");
             out.println("<div class=\"btn-toolbar\" role=\"toolbar\">");
