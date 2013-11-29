@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -67,23 +69,25 @@ public class ShowGroups extends HttpServlet {
                 out.println("</div>");
                 out.println("<ul class=\"list-group\">");
 
-                ResultSet gruppi = (ResultSet) manager.getGroups(user);
+                List<Groups> gruppi = (ArrayList)manager.getGroups(user);
                  //out.println(gruppi);
 
                 if (gruppi != null) {
                      
-                    Array vector=gruppi.getArray("NAME");
-                    out.println(vector);
-                    while (gruppi.next()) {
-                       // String nome = gruppi.getNString("NAME").;
-                        out.println("2");
-
-                        // stampa a video
-                        out.println("<li class=\"list-group-item\">3</li>");
+                  
+                   
+                     for(int i=0; i<gruppi.size();i++){
                         
-                         
+                        out.println("<li class=\"list-group-item\">"
+                                + " Nome:" + gruppi.get(i).getGroupName() 
+                                + " Admin: " + gruppi.get(i).getAdmin().getName()
+                                + " Id: " + gruppi.get(i).getId()
+                                + " Data: " +gruppi.get(i).getData_creazione()
+                                + "</li>");
+                        
+                     }
                     }
-                } else {
+                 else {
                     out.println("<h2>Non vi sono gruppi!</h2>");
                    
                 }
