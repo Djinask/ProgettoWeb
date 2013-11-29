@@ -8,6 +8,10 @@
         <description>listener</description>
         <listener-class>listener.ContextListener</listener-class>
     </listener>
+    <listener>
+        <description>listener</description>
+        <listener-class>listener.ContextListener</listener-class>
+    </listener>
     <servlet>
         <servlet-name>DBManager</servlet-name>
         <servlet-class>DB.DBManager</servlet-class>
@@ -39,10 +43,6 @@
     <servlet>
         <servlet-name>ShowGroups</servlet-name>
         <servlet-class>servlet.ShowGroups</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>Gruppo</servlet-name>
-        <servlet-class>servlet.Gruppo</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>DBManager</servlet-name>
@@ -79,10 +79,6 @@
     <servlet-mapping>
         <servlet-name>ShowGroups</servlet-name>
         <url-pattern>/ShowGroups</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Gruppo</servlet-name>
-        <url-pattern>/Gruppo</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
