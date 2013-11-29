@@ -7,6 +7,7 @@
 package DB;
 
 import java.io.Serializable;
+import java.sql.Date;
 
 /**
  *
@@ -17,6 +18,15 @@ public class Groups implements Serializable {
     Users admin;
     String Thread;
     int id;
+    Date data_creazione;
+
+    public Date getData_creazione() {
+        return data_creazione;
+    }
+
+    public void setData_creazione(Date data_creazione) {
+        this.data_creazione = data_creazione;
+    }
 
     public String getGroupName() {
         return GroupName;

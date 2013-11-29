@@ -11,7 +11,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -107,7 +109,7 @@ public class DBManager implements Serializable {
         }
 
     } //To change body of generated methods, choose Tools | Templates.
-public Collection getoGroups(Users utente) throws SQLException {
+public List<Groups> getGroups(Users utente) throws SQLException {
 
         PreparedStatement stm = conn.prepareStatement("SELECT * FROM GRUPPI WHERE ADMIN = ?");
         try {
@@ -117,9 +119,19 @@ public Collection getoGroups(Users utente) throws SQLException {
             ResultSet rs = stm.executeQuery();
             
                 if (rs.next()) {
-                    
+                    List<Groups> gruppi = new ArrayList();
+                    do {
+                    Groups gruppo=new Groups();
+                    gruppo.setId(rs.getInt("ID_GRUPPO"));
+                    gruppo.setData_creazione(rs.getDate("DATA_CREAZIONE"));
+                    gruppo.setGroupName(rs.getString("NAME"));
+                    gruppo.setAdmin(utente);
+                    gruppi.add(gruppo);
+                          
+                    } while(rs.next());
+                    return gruppi;
 
-                    return rs;
+                    
                 } else {
                     return null;
                 }
@@ -127,5 +139,6 @@ public Collection getoGroups(Users utente) throws SQLException {
         } finally {
             stm.close();
         }
+        
     }
 }
