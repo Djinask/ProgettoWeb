@@ -72,7 +72,7 @@ public class LoggedHome extends HttpServlet {
 
             out.println("<a class=\"btn btn-default\" href=\"ShowGroups\" role=\"button\">Gruppi</a>");
              out.println("<a class=\"btn btn-default\" href=\"CreaGruppo\" role=\"button\" >Crea Gruppo</a>");
-              out.println("<a class=\"btn btn-default\" href=\"#\" role=\"button\"  >Invita</a>");
+              out.println("<a class=\"btn btn-default\" href=\"Inviti\" role=\"button\"  >Gestisci inviti</a>");
             out.println("</div>");
             out.println("</div>");
             out.println("<br>");

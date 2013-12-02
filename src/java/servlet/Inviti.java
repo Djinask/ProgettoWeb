@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package servlet;
 
 import DB.DBManager;
 import DB.Groups;
+import DB.Invites;
 import DB.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Array;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +27,10 @@ import javax.servlet.http.HttpSession;
  *
  * @author djinask
  */
-public class ShowGroups extends HttpServlet {
-
+public class Inviti extends HttpServlet {
     private DBManager manager;
+    
+    Users user;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -39,54 +40,48 @@ public class ShowGroups extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-     * @throws java.sql.SQLException
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        HttpSession session = request.getSession(false);
-        this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
+      HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
 
             response.sendRedirect(request.getContextPath() + "/Login");
-            
 
         } else {
-            Users user = (Users) session.getAttribute("user");
+            user = (Users) session.getAttribute("user");
             response.setContentType("text/html;charset=UTF-8");
-
-            try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head><link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
-                out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
-                out.println("<title>Gruppi utente</title>");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<div class=\"jumbotron\">");
-                out.println("<h1>Gruppi di " + user.getName() + "</h1>");
-                out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
+            PrintWriter out = response.getWriter();
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head><link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
+            out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
+            out.println("<title>Inviti</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<div class=\"jumbotron\">");
+            
+             out.println("<h1><span class=\"glyphicon glyphicon-lock\"></span>Inviti di " + user.getName() + "!</h1>");
+              out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
                 out.println("</div>");
-                out.println("<ul class=\"list-group\">");
-
-                List<Groups> gruppi = (ArrayList)manager.getGroups(user);
+      out.println("<ul class=\"list-group\">");
+         out.println(user);
+               List<Invites> inviti = (ArrayList)manager.getInviti(user);
                  //out.println(gruppi);
 
-                if (gruppi != null) {
+                if (inviti != null) {
                      
                   
                    
-                     for(int i=0; i<gruppi.size();i++){
+                     for(int i=0; i<inviti.size();i++){
                         
-                        out.println("<a href=\"Gruppo?id="
-                                
-                                + gruppi.get(i).getId()
-                                +"\"><li class=\"list-group-item\">"
+                        out.println("<li class=\"list-group-item\">"
    
-                                + " Nome:" + gruppi.get(i).getGroupName() 
-                                + " Admin: " + gruppi.get(i).getAdmin().getName()
-                                + " Id: " + gruppi.get(i).getId()
-                                + " Data: " +gruppi.get(i).getData_creazione()
+                                + " Date:" + inviti.get(i).getData_invito()
+                                + " Gruppo: " + inviti.get(i).getNomeGruppo()
+                                + " Proprietario: " + inviti.get(i).getFrom()
+                      
                                 + "</li>"
                                 + "</a>");
                         
@@ -100,10 +95,14 @@ public class ShowGroups extends HttpServlet {
                
                 //ciclo    out.println("<li class=\"list-group-item\">Cras justo odio</li>");
                 out.println("</ul>");
-                out.println("</body>");
-                out.println("</html>");
-            }
+
+            
+            out.println("</body>");
+            out.println("</html>");
+
+            //EMETTERE il CODICE HTML della pagine qui
         }
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -118,10 +117,10 @@ public class ShowGroups extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
+          try {
             processRequest(request, response);
         } catch (SQLException ex) {
-            Logger.getLogger(ShowGroups.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Inviti.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -139,7 +138,7 @@ public class ShowGroups extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (SQLException ex) {
-            Logger.getLogger(ShowGroups.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Inviti.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
