@@ -22,6 +22,16 @@ public class Posts {
     String testo;
     //Date data_post;
     Timestamp data_post;
+    Boolean allegato;
+
+    public Boolean isAllegato() {
+        return allegato;
+    }
+
+    public void setAllegato(Boolean allegato) {
+        this.allegato = allegato;
+    }
+    
 
     public Timestamp getData() {
         return data_post;

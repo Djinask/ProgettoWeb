@@ -5,15 +5,15 @@
  */
 package DB;
 
-import java.io.PrintWriter;
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -165,8 +165,8 @@ public class DBManager implements Serializable {
 
     public Groups getGroup(Integer id_gruppo, Users user) throws SQLException {
 
-        PreparedStatement stm = conn.prepareStatement("SELECT ID_GRUPPO, ADMIN, THREAD,  GRUPPI.DATA_CREAZIONE, GRUPPI.NAME AS \"NOME_GRUPPO\", USERS.NAME AS \"NOME_OWNER\" FROM GRUPPI JOIN USERS \n" +
-"ON GRUPPI.ADMIN=USERS.ID WHERE ID_GRUPPO = ?");
+        PreparedStatement stm = conn.prepareStatement("SELECT ID_GRUPPO, ADMIN, THREAD,  GRUPPI.DATA_CREAZIONE, GRUPPI.NAME AS \"NOME_GRUPPO\", USERS.NAME AS \"NOME_OWNER\" FROM GRUPPI JOIN USERS \n"
+                + "ON GRUPPI.ADMIN=USERS.ID WHERE ID_GRUPPO = ?");
         try {
             stm.setInt(1, id_gruppo);
 
@@ -195,33 +195,67 @@ public class DBManager implements Serializable {
 
     }
 
-    public Boolean AddPost(String testo, Users user, Groups gruppo) throws SQLException, ServletException {
+    public Boolean AddPost(Posts post, List<MyFiles> files) throws SQLException, ServletException {
+        String sql_post = "INSERT INTO POSTS(ID_CREATORE,TESTO,ID_GRUPPO, ALLEGATO) VALUES(?,?,?,?)";
+        String sql_file = "INSERT INTO FILES(ORIGINAL_FILE_NAME,NEW_FILE_NAME,TYPE,PATH,POST_REFERENCE,LENGTH) VALUES (?,?,?,?,?,?)";
 
-        PreparedStatement stm = conn.prepareStatement("INSERT INTO POSTS(ID_CREATORE,TESTO,ID_GRUPPO) VALUES(?,?,?)");
-
+        PreparedStatement stm1 = conn.prepareStatement(sql_post, Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement stm2 = conn.prepareStatement(sql_file);
+        int id_post = 0;
         try {
 
-            stm.setInt(1, user.getId());
-            stm.setString(2, testo);
-            stm.setInt(3, gruppo.getId());
+            stm1.setInt(1, post.getId_creatore());
+            stm1.setString(2, post.getTesto());
+            stm1.setInt(3, post.getId_gruppo());
+            stm1.setBoolean(4, post.isAllegato());
 
             try {
-                stm.executeUpdate();
-
-                return true;
+                stm1.executeUpdate();
+                ResultSet genKey = stm1.getGeneratedKeys();
+                if (genKey.next()) {
+                    id_post = genKey.getInt(1);
+                }
+                if (post.isAllegato()) {
+                    for (int i = 0; i < files.size(); i++){
+                    stm2.setString(1,files.get(i).getOrigin_name());
+                    
+                    stm2.setString(2, files.get(i).getName());
+                    stm2.setString(3, files.get(i).getType());
+                    stm2.setString(4, files.get(i).getPath());
+                    stm2.setInt(5, id_post);
+                    stm2.setLong(6, files.get(i).getLength());
+                    try{
+                        stm2.executeUpdate();
+                    }catch (SQLException ex){
+                        throw new ServletException(ex);
+                    }
+                    }
+                    
+                    
+                }
             } catch (SQLException ex) {
-                throw new ServletException(ex);
+            throw new ServletException(ex);
 
-            }
-        } finally {
-            stm.close();
         }
+            return true;
+            //inserisco file
+        } catch (SQLException ex) {
+            throw new ServletException(ex);
 
+        }
+    
+
+    
+        finally {
+            stm1.close();
+            stm2.close();
     }
 
-    public List<Posts> getPosts(Groups gruppo) throws SQLException {
+}
 
-        PreparedStatement stm = conn.prepareStatement("SELECT * FROM POSTS JOIN USERS ON POSTS.ID_CREATORE=USERS.ID WHERE ID_GRUPPO=?");
+public List<Posts> getPosts(Groups gruppo) throws SQLException {
+
+        PreparedStatement stm = conn.prepareStatement("SELECT * FROM POSTS JOIN USERS ON POSTS.ID_CREATORE=USERS.ID WHERE ID_GRUPPO=? ORDER BY DATA_POST DESC");
         try {
             stm.setInt(1, gruppo.getId());
 
@@ -237,6 +271,7 @@ public class DBManager implements Serializable {
                     post.setId_gruppo(rs.getInt("ID_GRUPPO"));
                     post.setTesto(rs.getString("TESTO"));
                     post.setCreatore(rs.getString("NAME"));
+                    post.setAllegato(rs.getBoolean("ALLEGATO"));
 
                     posts.add(post);
 

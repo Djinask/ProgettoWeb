@@ -47,6 +47,11 @@
     <servlet>
         <servlet-name>Gruppo</servlet-name>
         <servlet-class>servlet.Gruppo</servlet-class>
+        <init-param>
+            <param-name>uploadDir</param-name>
+            <param-value>/home/djinask/NetBeansProjects/ProgettoWeb/tmp</param-value>
+        </init-param>
+       
     </servlet>
     <servlet>
         <servlet-name>Invita</servlet-name>
@@ -55,6 +60,14 @@
     <servlet>
         <servlet-name>Inviti</servlet-name>
         <servlet-class>servlet.Inviti</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Upload</servlet-name>
+        <servlet-class>servlet.Upload</servlet-class>
+         <init-param>
+            <param-name>uploadDir</param-name>
+            <param-value>/home/djinask/NetBeansProjects/ProgettoWeb/tmp</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>DBManager</servlet-name>
@@ -95,6 +108,7 @@
     <servlet-mapping>
         <servlet-name>Gruppo</servlet-name>
         <url-pattern>/Gruppo</url-pattern>
+        
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Invita</servlet-name>
@@ -103,6 +117,10 @@
     <servlet-mapping>
         <servlet-name>Inviti</servlet-name>
         <url-pattern>/Inviti</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Upload</servlet-name>
+        <url-pattern>/Upload</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
