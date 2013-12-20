@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -62,39 +63,59 @@ public class ShowGroups extends HttpServlet {
                 out.println("<title>Gruppi utente</title>");
                 out.println("</head>");
                 out.println("<body>");
+                out.println("<ul class=\"nav nav-tabs\">\n"
+                        + "  <li><a href=\"LoggedHome\">Home</a></li>\n"
+                        + "  <li><a href=\"ProfiloUtente\">Profile</a></li>\n"
+                        + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
+                        + "</ul>");
                 out.println("<div class=\"jumbotron\">");
+                if (user.getAvatar_path().equals("null")) {
+                    out.println("<span class=\"glyphicon glyphicon-user\"></span>");
+                } else {
+                    out.println("<img src=\"" + user.getAvatar_path() + "\" class=\"img-thumbnail\"  height=\"60\" width=\"60\" />");
+                }
                 out.println("<h1>Gruppi di " + user.getName() + "</h1>");
-                out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
-                out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"LoggedHome\">HOME</a>");
 
                 out.println("</div>");
-                out.println("<ul class=\"list-group\">");
+                out.println("<table class=\"table table-hover\">"
+                        + "<tr class=\"active\">"
+                        + "<th>#</th>"
+                         + "<th>Nome Gruppo</th>"
+                         + "<th>Proprietario</th>"
+                         + "<th>Data Creazione</th>"
+                        + "</tr>");
 
                 List<Groups> gruppi = (ArrayList) manager.getGroups(user);
                 //out.println(gruppi);
-
                 if (gruppi != null) {
-
                     for (int i = 0; i < gruppi.size(); i++) {
-
-                        out.println("<a href=\"Gruppo?id="
-                                + gruppi.get(i).getId()
-                                + "\"><li class=\"list-group-item\">"
-                                + " Nome:" + gruppi.get(i).getGroupName()
-                                + " Admin: " + gruppi.get(i).getOwner()
-                                + " Id: " + gruppi.get(i).getId()
-                                + " Data: " + gruppi.get(i).getData()
-                                + "</li>"
-                                + "</a>");
+                        String date;
+                        date= new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(gruppi.get(i).getData());
+                        out.println(""
+                                + "<tr>"
+                               
+                                + "<td>" + (i+1)
+                                + "</td>"
+                                + "<td>"
+                                + "<a href=\"Gruppo?id="
+                                
+                                + "" + gruppi.get(i).getId() +"\">" + gruppi.get(i).getGroupName()
+                                + "</a>"
+                                + "</td>"
+                                + "<td>" + gruppi.get(i).getOwner()
+                                + "</td>"
+                                + "<td>" + date
+                                + "</td>"
+                                + "</tr>");
 
                     }
                 } else {
                     out.println("<h2>Non vi sono gruppi!</h2>");
 
                 }
-
+                out.println("</table>");
                 //ciclo    out.println("<li class=\"list-group-item\">Cras justo odio</li>");
-                out.println("</ul>");
+
                 out.println("</body>");
                 out.println("</html>");
             }

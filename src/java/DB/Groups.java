@@ -8,6 +8,7 @@ package DB;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
@@ -18,7 +19,15 @@ public class Groups implements Serializable {
     String owner;
     String Thread;
     int id;
-    Date data;
+    Timestamp data;
+
+    public Timestamp getData() {
+        return data;
+    }
+
+    public void setData(Timestamp data) {
+        this.data = data;
+    }
     int admin;
 
     public int getAdmin() {
@@ -30,13 +39,7 @@ public class Groups implements Serializable {
     }
     
 
-    public Date getData() {
-        return data;
-    }
-
-    public void setData(Date data) {
-        this.data = data;
-    }
+  
 
     public String getGroupName() {
         return GroupName;

@@ -8,13 +8,15 @@ package servlet;
 import DB.DBManager;
 import DB.Groups;
 import DB.Users;
+import com.oreilly.servlet.MultipartRequest;
+import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +27,13 @@ import javax.servlet.http.HttpSession;
  *
  * @author djinask
  */
-public class Invita extends HttpServlet {
+public class ProfiloUtente extends HttpServlet {
 
     private DBManager manager;
-    int id_gruppo;
-    Users user;
+
+    Users user = null;
+
+    private String dirName;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -40,6 +44,8 @@ public class Invita extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+  
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -60,55 +66,43 @@ public class Invita extends HttpServlet {
 
         } else {
             user = (Users) session.getAttribute("user");
-            id_gruppo = Integer.parseInt(request.getParameter("id_group"));
 
             response.setContentType("text/html;charset=UTF-8");
-
             try (PrintWriter out = response.getWriter()) {
                 /* TODO output your page here. You may use following sample code. */
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
-                out.println("<head><link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
-                out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
-                out.println("<title>Gruppi utente</title>");
+                out.println("<head>"
+                        + "<link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
+            out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
+                out.println("<title>Profilo Utente</title>");
                 out.println("</head>");
                 out.println("<body>");
-                out.println("<div class=\"jumbotron\">");
-                Groups gruppo = (Groups) manager.getGroup(id_gruppo, user);
+                out.println("<ul class=\"nav nav-tabs\">\n"
+                    + "  <li><a href=\"LoggedHome\">Home</a></li>\n"
+                    + "  <li class=\"active\"><a href=\"ProfiloUtente\">Profile</a></li>\n"
+                    + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
+                    + "</ul>");
 
-                out.println("<h1>Invita a " + gruppo.getGroupName() + "</h1>");
-                out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
-                out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"LoggedHome\">HOME</a>");
+                out.println("<div name = \"form\" style=\"min-height:100px;\">");
+                out.println("<form class=\"navbar-form navbar-left\" "
+                        + "action=\"ProfiloUtente\" "
+                        + "enctype=\"multipart/form-data\" "
+                        + "method=\"post\">");
 
+                out.println("<div class=\"input-group input-group-lg\">");
+                out.println("<span class=\"input-group-addon\">Avatar</span>");
+
+                out.println("<input type=\"FILE\" name=\"avatar\">");
+                out.println("<button  class=\"btn btn-default btn-lg btn-primary\" type=\"submit\">Crea</button>");
                 out.println("</div>");
-                out.println("<legend>Seleziona gli utenti che vuoi invitare al gruppo:</leged>");
-                out.println("<form class=\"navbar-form navbar-left\"action=\"Invita\" method=\"post\">");
-
-                out.println("<ul class=\"list-group\">");
-
-                List<Users> utenti = (ArrayList) manager.getUsers(user, id_gruppo);
-                if (utenti != null) {
-                    for (int i = 0; i < utenti.size(); i++) {
-                        out.println("<li class=\"list-group-item\">"
-                                + "<input type=\"checkbox\" name=\"inviti\" value=\"" + utenti.get(i).getId() + "\"/>"
-                                + " Nome: " + utenti.get(i).getName()
-                                + "           Mail:" + utenti.get(i).getmail()
-                                + " </li>"
-                                + "</a>");
-                    }
-                } else {
-                    out.println("<h2>Non vi sono utenti</h2>");
-
-                }
-
-                out.println("</ul>");
-                out.println("<button  class=\"btn btn-default btn-lg\" type=\"submit\">Conferma inviti</button>");
 
                 out.println("</form>");
+
+                out.println("</div>");
+
                 out.println("</body>");
                 out.println("</html>");
-            } catch (SQLException ex) {
-                Logger.getLogger(Invita.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -124,35 +118,30 @@ public class Invita extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
-        String[] inviti = request.getParameterValues("inviti");
-        Boolean invitati = false;
-        PrintWriter out = response.getWriter();
-        out.println("<!DOCTYPE html>");
-        out.println("<html>");
-        out.println("<head><link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
-        out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
-        out.println("<title>Gruppi utente</title>");
-        out.println("</head>");
-        out.println("<body>");
+        doGet(request, response);
+        MultipartRequest multi;
+        String destination = getServletContext().getRealPath("/") + "/users";
+        File theFile = new File(destination + "/" + user.getId());
+        theFile.mkdirs();
+
+        multi = new MultipartRequest(request, theFile.toString(), 10 * 1024 * 1024,
+                "ISO-8859-1", new DefaultFileRenamePolicy());
+
+        String file = null;
+        file = multi.getFile("avatar").getName();
         try {
-            invitati = this.manager.AddInviti(id_gruppo, user, inviti);
+            manager.updateAvatar(user.getId(), "users/" + theFile.getName() + "/" + file);
+            user = manager.getUser(user.getId());
+            HttpSession session;
+            session = request.getSession(false);
 
+            session.setAttribute("user", user);
         } catch (SQLException ex) {
-            Logger.getLogger(Invita.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ProfiloUtente.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if (invitati) {
+        PrintWriter out = response.getWriter();
         response.sendRedirect(request.getContextPath() + "/LoggedHome");
-        } else {
-            out.println("Non Inseriti");
 
-        }
-                    
-
-        out.println("</form>");
-        out.println("</body>");
-        out.println("</html>");
     }
 
     /**

@@ -36,7 +36,7 @@ public class DBManager implements Serializable {
 
     public static void shutdown() {
         try {
-            DriverManager.getConnection("jdbc:derby:;shutdown=true");
+            DriverManager.getConnection("jdbc:derby;shutdown=true");
         } catch (SQLException ex) {
             Logger.getLogger(DBManager.class.getName()).info(ex.getMessage());
         }
@@ -72,6 +72,37 @@ public class DBManager implements Serializable {
                     user.setpassword(rs.getString("PASSWORD"));
                     user.setName(rs.getString("NAME"));
                     user.setId(rs.getInt("ID"));
+                    user.setAvatar_path(rs.getString("AVATAR_PATH"));
+
+                    return user;
+                } else {
+                    return null;
+                }
+            } finally {
+                rs.close();
+            }
+        } finally {
+            stm.close();
+        }
+    }
+
+    public Users getUser(int user_id) throws SQLException {
+
+        PreparedStatement stm = conn.prepareStatement("SELECT * FROM USERS WHERE ID = ?");
+
+        try {
+            stm.setInt(1, user_id);
+
+            ResultSet rs = stm.executeQuery();
+            try {
+                if (rs.next()) {
+                    Users user = new Users();
+                    user.setmail(rs.getString("MAIL"));
+                    user.setpassword(rs.getString("PASSWORD"));
+                    user.setName(rs.getString("NAME"));
+                    user.setId(rs.getInt("ID"));
+
+                    user.setAvatar_path(rs.getString("AVATAR_PATH"));
 
                     return user;
                 } else {
@@ -121,7 +152,7 @@ public class DBManager implements Serializable {
                 + "ON GRUPPI.ID_GRUPPO=PARTEC.ID_GRUPPO \n"
                 + "JOIN USERS \n"
                 + "ON GRUPPI.ADMIN=USERS.ID\n"
-                + "WHERE PARTEC.ID_USER=? \n"
+                + "WHERE PARTEC.ID_USER=? AND PARTEC.ACTIVE=true \n"
                 + "UNION\n"
                 + "SELECT "
                 + "GRUPPI.ID_GRUPPO, "
@@ -144,7 +175,7 @@ public class DBManager implements Serializable {
                 do {
                     Groups gruppo = new Groups();
                     gruppo.setId(rs.getInt("ID_GRUPPO"));
-                    gruppo.setData(rs.getDate("DATA"));
+                    gruppo.setData(rs.getTimestamp("DATA"));
                     gruppo.setGroupName(rs.getString("NOME_GRUPPO"));
                     gruppo.setOwner(rs.getString("OWNER"));
                     gruppo.setThread(rs.getString("THREAD"));
@@ -177,11 +208,12 @@ public class DBManager implements Serializable {
                 Groups gruppo = new Groups();
 
                 gruppo.setId(rs.getInt("ID_GRUPPO"));
-                gruppo.setData(rs.getDate("DATA_CREAZIONE"));
+                gruppo.setData(rs.getTimestamp("DATA_CREAZIONE"));
                 gruppo.setGroupName(rs.getString("NOME_GRUPPO"));
                 gruppo.setOwner(rs.getString("NOME_OWNER"));
                 gruppo.setAdmin(rs.getInt("ADMIN"));
                 gruppo.setThread(rs.getString("THREAD"));
+                rs.close();
 
                 return gruppo;
 
@@ -202,6 +234,7 @@ public class DBManager implements Serializable {
         PreparedStatement stm1 = conn.prepareStatement(sql_post, Statement.RETURN_GENERATED_KEYS);
         PreparedStatement stm2 = conn.prepareStatement(sql_file);
         int id_post = 0;
+
         try {
 
             stm1.setInt(1, post.getId_creatore());
@@ -216,44 +249,39 @@ public class DBManager implements Serializable {
                     id_post = genKey.getInt(1);
                 }
                 if (post.isAllegato()) {
-                    for (int i = 0; i < files.size(); i++){
-                    stm2.setString(1,files.get(i).getOrigin_name());
-                    
-                    stm2.setString(2, files.get(i).getName());
-                    stm2.setString(3, files.get(i).getType());
-                    stm2.setString(4, files.get(i).getPath());
-                    stm2.setInt(5, id_post);
-                    stm2.setLong(6, files.get(i).getLength());
-                    try{
-                        stm2.executeUpdate();
-                    }catch (SQLException ex){
-                        throw new ServletException(ex);
+                    for (int i = 0; i < files.size(); i++) {
+                        stm2.setString(1, files.get(i).getOrigin_name());
+
+                        stm2.setString(2, files.get(i).getName());
+                        stm2.setString(3, files.get(i).getType());
+                        stm2.setString(4, files.get(i).getPath());
+                        stm2.setInt(5, id_post);
+                        stm2.setLong(6, files.get(i).getLength());
+                        try {
+                            stm2.executeUpdate();
+                        } catch (SQLException ex) {
+                            throw new ServletException(ex);
+                        }
                     }
-                    }
-                    
-                    
+
                 }
             } catch (SQLException ex) {
-            throw new ServletException(ex);
+                throw new ServletException(ex);
 
-        }
+            }
             return true;
             //inserisco file
         } catch (SQLException ex) {
             throw new ServletException(ex);
 
-        }
-    
-
-    
-        finally {
+        } finally {
             stm1.close();
             stm2.close();
+        }
+
     }
 
-}
-
-public List<Posts> getPosts(Groups gruppo) throws SQLException {
+    public List<Posts> getPosts(Groups gruppo) throws SQLException {
 
         PreparedStatement stm = conn.prepareStatement("SELECT * FROM POSTS JOIN USERS ON POSTS.ID_CREATORE=USERS.ID WHERE ID_GRUPPO=? ORDER BY DATA_POST DESC");
         try {
@@ -272,6 +300,7 @@ public List<Posts> getPosts(Groups gruppo) throws SQLException {
                     post.setTesto(rs.getString("TESTO"));
                     post.setCreatore(rs.getString("NAME"));
                     post.setAllegato(rs.getBoolean("ALLEGATO"));
+                    post.setUser_avatar_path(rs.getString("AVATAR_PATH"));
 
                     posts.add(post);
 
@@ -288,11 +317,18 @@ public List<Posts> getPosts(Groups gruppo) throws SQLException {
 
     }
 
-    public List<Users> getUsers(Users richiedente) throws SQLException {
+    public List<Users> getUsers(Users richiedente, int id_gruppo) throws SQLException {
 
-        PreparedStatement stm = conn.prepareStatement("SELECT * FROM USERS EXCEPT SELECT * FROM USERS WHERE ID = ? ");
+        PreparedStatement stm = conn.prepareStatement("SELECT ID, MAIL, NAME FROM USERS\n"
+                + "EXCEPT\n"
+                + "(SELECT ID, MAIL, NAME FROM USERS WHERE ID = ? \n"
+                + "UNION \n"
+                + "SELECT ID, MAIL, NAME FROM USERS JOIN INVITI \n"
+                + "ON USERS.ID=INVITI.ID_USER \n"
+                + "WHERE ID_GRUPPO=? AND INVITI.NASCOSTO=false)");
         try {
             stm.setInt(1, richiedente.getId());
+            stm.setInt(2, id_gruppo);
 
             ResultSet rs = stm.executeQuery();
 
@@ -315,6 +351,64 @@ public List<Posts> getPosts(Groups gruppo) throws SQLException {
 
         } finally {
             stm.close();
+        }
+
+    }
+
+    public List<Users> getUsersGroup(Users richiedente, int id_gruppo, Boolean mode) throws SQLException {
+
+        //mode= true shows users available
+        //mode= false shows users deletable
+        String sql1 = "SELECT USERS.ID as ID_USER, MAIL,AVATAR_PATH, NAME FROM USERS \n"
+                + "JOIN PARTEC\n"
+                + "ON USERS.ID=PARTEC.ID_USER\n"
+                + "WHERE ID_GRUPPO=? AND PARTEC.ACTIVE=true";
+
+        String sql2 = "SELECT USERS.ID as ID_USER, MAIL,AVATAR_PATH, NAME FROM USERS \n"
+                + "EXCEPT\n"
+                + "(SELECT USERS.ID as ID_USER, MAIL, AVATAR_PATH,NAME FROM USERS WHERE ID = ?)\n"
+                + "UNION\n"
+                + "SELECT USERS.ID as ID_USER, MAIL, AVATAR_PATH,NAME FROM USERS \n"
+                + "JOIN PARTEC \n"
+                + "ON USERS.ID=PARTEC.ID_USER \n"
+                + "WHERE ID_GRUPPO=? AND PARTEC.ACTIVE=false";
+
+        PreparedStatement stm1 = conn.prepareStatement(sql1);
+        PreparedStatement stm2 = conn.prepareStatement(sql2);
+        try {
+            ResultSet rs;
+            if (!mode) {
+                stm1.setInt(1, id_gruppo);
+
+                rs = stm1.executeQuery();
+            } else {
+
+                stm2.setInt(1, richiedente.getId());
+                stm2.setInt(2, id_gruppo);
+
+                rs = stm2.executeQuery();
+            }
+
+            if (rs.next()) {
+                List<Users> utenti = new ArrayList();
+                do {
+                    Users user = new Users();
+                    user.setId(rs.getInt("ID_USER"));
+                    user.setName(rs.getString("NAME"));
+                    user.setmail(rs.getString("MAIL"));
+                     user.setAvatar_path(rs.getString("AVATAR_PATH"));
+                    utenti.add(user);
+
+                } while (rs.next());
+                return utenti;
+
+            } else {
+                return null;
+            }
+
+        } finally {
+            stm1.close();
+            stm2.close();
         }
 
     }
@@ -402,7 +496,6 @@ public List<Posts> getPosts(Groups gruppo) throws SQLException {
 
     public int getInvitiNumber(Users utente) throws SQLException, ServletException {
 
-        List<Invites> inviti = new ArrayList();
         int notifiche = 0;
         PreparedStatement stm = conn.prepareStatement("SELECT COUNT(*) AS \"CONTA\""
                 + "FROM INVITI  JOIN GRUPPI  "
@@ -496,6 +589,170 @@ public List<Posts> getPosts(Groups gruppo) throws SQLException {
         }
 
         return fatto;
+    }
+
+    public MyFiles getAnnex(int id_post) throws SQLException, ServletException {
+
+        String sql = "SELECT * FROM FILES WHERE POST_REFERENCE = ?";
+        PreparedStatement stm = conn.prepareStatement(sql);
+        try {
+            stm.setInt(1, id_post);
+
+            ResultSet rs = stm.executeQuery();
+
+            if (rs.next()) {
+
+                MyFiles mio_file = new MyFiles();
+                mio_file.setLength(rs.getLong("LENGTH"));
+                mio_file.setPath(rs.getString("PATH"));
+                mio_file.setName(rs.getString("NEW_FILE_NAME"));
+                mio_file.setOrigin_name(rs.getString("ORIGINAL_FILE_NAME"));
+                mio_file.setLength(rs.getLong("LENGTH"));
+
+                rs.close();
+
+                return mio_file;
+
+            } else {
+                return null;
+            }
+
+        } finally {
+            stm.close();
+        }
+
+    }
+
+    public Boolean updateAvatar(int user_id, String path) throws SQLException, ServletException {
+        PreparedStatement stm = conn.prepareStatement("UPDATE USERS SET AVATAR_PATH=? WHERE ID=?");
+        Boolean fatto = false;
+
+        try {
+
+            stm.setString(1, path);
+            stm.setInt(2, user_id);
+
+            try {
+                stm.executeUpdate();
+
+                fatto = true;
+            } catch (SQLException ex) {
+                throw new ServletException(ex);
+
+            }
+        } finally {
+            stm.close();
+        }
+        return fatto;
+
+    }
+
+    public Boolean DeleteUsers(int id_gruppo, Users user, String[] rimossi) throws SQLException, ServletException {
+        int i;
+        String sql_delete_users = "UPDATE PARTEC SET ACTIVE=FALSE WHERE ID_GRUPPO=? AND ID_USER=?";
+         String hide_invites = "UPDATE INVITI SET NASCOSTO=TRUE WHERE ID_INVITO=?";
+
+        String sql_get_id_invite = "SELECT * FROM PARTEC WHERE ID_GRUPPO=? AND ID_USER=? AND ACTIVE=TRUE";
+
+        PreparedStatement stm1 = conn.prepareStatement(sql_delete_users);
+        int id_invito = 0;
+        int rimosso;
+        ResultSet res;
+        
+
+        PreparedStatement invites = conn.prepareStatement(sql_get_id_invite);
+                PreparedStatement hide = conn.prepareStatement(hide_invites);
+        try {
+            for (i = 0; i < rimossi.length; i++) {
+
+                rimosso = Integer.parseInt(rimossi[i]);
+
+                invites.setInt(1, (int) id_gruppo);
+                invites.setInt(2, (int) rimosso);
+              
+                res = invites.executeQuery();
+                id_invito = 0;
+                if (res.next()) {
+                    id_invito = res.getInt("ID_INVITO");
+
+                   
+                }
+                hide.setInt(1, (int) id_invito);
+                hide.executeUpdate();
+                res.close();
+            }
+        } finally {
+            invites.close();
+            hide.close();
+        }
+        
+        
+        try {
+            for (i = 0; i < rimossi.length; i++) {
+
+                rimosso = Integer.parseInt(rimossi[i]);
+
+                stm1.setInt(1, id_gruppo);
+
+                stm1.setInt(2, rimosso);
+
+                System.out.println("id_gr =" + id_gruppo);
+                System.out.println("id_user =" + rimosso);
+
+                try {
+
+                    stm1.executeUpdate();
+
+                } catch (SQLException ex) {
+                    throw new ServletException(ex);
+
+                }
+            }
+        } finally {
+            stm1.close();
+
+        }
+
+        return true;
+//To change body of generated methods, choose Tools | Templates.
+    }
+
+    public Boolean editGroup(int id, String new_name, String new_thread, Users user) throws SQLException, ServletException {
+                String edit_group = "UPDATE GRUPPI SET NAME=?,THREAD=? WHERE ID_GRUPPO=?";
+                 PreparedStatement stm =conn.prepareStatement(edit_group);
+                    Groups group= new Groups();
+                    group = (Groups)this.getGroup(id, user);
+                    System.out.println(new_name);
+                    System.out.println(new_thread);
+                     System.out.println(id);
+                      System.out.println(user.getName());
+                    System.out.println(group.getId());
+                    if(new_thread.equals("")){
+                        new_thread=group.getThread();
+                        
+                    }
+                    if(new_name.equals("")){
+                        new_name=group.getGroupName();
+                    }
+                        
+                    
+                    stm.setString(1, new_name);
+                    stm.setString(2, new_thread);
+                    stm.setInt(3, group.getId());
+                    
+                    try {
+
+                    stm.executeUpdate();
+
+                } catch (SQLException ex) {
+                    throw new ServletException(ex);
+
+                }finally{
+                        stm.close();
+                    }
+        
+        
+        return true;
     }
 
 }

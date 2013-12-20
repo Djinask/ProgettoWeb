@@ -9,11 +9,14 @@ import DB.DBManager;
 import DB.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,13 +61,14 @@ public class LoggedHome extends HttpServlet {
 
         } else {
             Users user = (Users) session.getAttribute("user");
+            
             int notifiche = 0;
             try {
                 notifiche = this.manager.getInvitiNumber(user);
             } catch (SQLException ex) {
                 Logger.getLogger(LoggedHome.class.getName()).log(Level.SEVERE, null, ex);
             }
-                response.setIntHeader("Refresh", 5);
+            response.setIntHeader("Refresh", 5);
             response.setContentType("text/html;charset=UTF-8");
             PrintWriter out = response.getWriter();
             /* TODO output your page here. You may use following sample code. */
@@ -79,10 +83,22 @@ public class LoggedHome extends HttpServlet {
                     + "</script> ");
             out.println("</head>");
             out.println("<body>");
+            out.println("<ul class=\"nav nav-tabs\">\n"
+                    + "  <li class=\"active\"><a href=\"LoggedHome\">Home</a></li>\n"
+                    + "  <li><a href=\"ProfiloUtente\">Profile</a></li>\n"
+                    + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
+                    + "</ul>");
             out.println("<div class=\"jumbotron\">");
-
-            out.println("<h1><span class=\"glyphicon glyphicon-user\"></span>Benvenuto,  " + user.getName() + "!</h1>");
-            out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
+            out.println("<h4>"+ new Time(session.getLastAccessedTime())+"</h4>");
+            out.println("<h4>"+ session.getCreationTime()+"</h4>");
+            out.println("<h1>");
+            if (user.getAvatar_path().equals("null")) {
+                out.println("<span class=\"glyphicon glyphicon-user\"></span>");
+            } else {
+                out.println("<img src=\"" + user.getAvatar_path() + "\" class=\"img-thumbnail\"  height=\"60\" width=\"60\" />");
+            }
+            out.println("Benvenuto,  " + user.getName() + "!</h1>");
+           
             out.println("</div>");
             out.println("<div class=\"btn-toolbar\" role=\"toolbar\">");
             out.println("<div class=\"btn-group btn-group-justified\">");

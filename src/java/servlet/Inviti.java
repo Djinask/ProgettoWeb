@@ -65,11 +65,15 @@ public class Inviti extends HttpServlet {
             out.println("<title>Inviti</title>");
             out.println("</head>");
             out.println("<body>");
+            out.println("<ul class=\"nav nav-tabs\">\n"
+                        + "  <li><a href=\"LoggedHome\">Home</a></li>\n"
+                        + "  <li><a href=\"ProfiloUtente\">Profile</a></li>\n"
+                        + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
+                        + "</ul>");
             out.println("<div class=\"jumbotron\">");
 
             out.println("<h1><span class=\"glyphicon glyphicon-user\"></span>Inviti di " + user.getName() + "!</h1>");
-            out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
-                          out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"LoggedHome\">HOME</a>");
+           
 
             out.println("</div>");
             out.println("<ul class=\"list-group\">");
@@ -180,11 +184,15 @@ public class Inviti extends HttpServlet {
             out.println("<title>Inviti</title>");
             out.println("</head>");
             out.println("<body>");
+            out.println("<ul class=\"nav nav-tabs\">\n"
+                        + "  <li><a href=\"LoggedHome\">Home</a></li>\n"
+                        + "  <li><a href=\"ProfiloUtente\">Profile</a></li>\n"
+                        + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
+                        + "</ul>");
             out.println("<div class=\"jumbotron\">");
 
             out.println("<h1><span class=\"glyphicon glyphicon-user\"></span>Inviti di " + user.getName() + "!</h1>");
-            out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"Logout\">LOGOUT</a>");
-                          out.println("<a class=\"btn btn-primary \" role=\"button\" href=\"LoggedHome\">HOME</a>");
+            
 
             out.println("</div>");
             out.println("<ul class=\"list-group\">");

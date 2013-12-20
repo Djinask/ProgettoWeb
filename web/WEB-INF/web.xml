@@ -47,11 +47,6 @@
     <servlet>
         <servlet-name>Gruppo</servlet-name>
         <servlet-class>servlet.Gruppo</servlet-class>
-        <init-param>
-            <param-name>uploadDir</param-name>
-            <param-value>/home/djinask/NetBeansProjects/ProgettoWeb/tmp</param-value>
-        </init-param>
-       
     </servlet>
     <servlet>
         <servlet-name>Invita</servlet-name>
@@ -64,10 +59,42 @@
     <servlet>
         <servlet-name>Upload</servlet-name>
         <servlet-class>servlet.Upload</servlet-class>
-         <init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>ProfiloUtente</servlet-name>
+        <servlet-class>servlet.ProfiloUtente</servlet-class>
+        <init-param>
             <param-name>uploadDir</param-name>
-            <param-value>/home/djinask/NetBeansProjects/ProgettoWeb/tmp</param-value>
+            <param-value>/home/djinask/NetBeansProjects/ProgettoWeb/web/users</param-value>
         </init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>ManageGroup</servlet-name>
+        <servlet-class>servlet.ManageGroup</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DeleteUsers</servlet-name>
+        <servlet-class>servlet.DeleteUsers</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditGroup</servlet-name>
+        <servlet-class>servlet.EditGroup</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PDFCouponServlet</servlet-name>
+        <servlet-class>servlet.PDFCouponServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PdfWriter</servlet-name>
+        <servlet-class>servlet.PdfWriter</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PdfWriter1</servlet-name>
+        <servlet-class>servlet.PdfWriter1</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Viewer</servlet-name>
+        <servlet-class>servlet.Viewer</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>DBManager</servlet-name>
@@ -108,7 +135,6 @@
     <servlet-mapping>
         <servlet-name>Gruppo</servlet-name>
         <url-pattern>/Gruppo</url-pattern>
-        
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Invita</servlet-name>
@@ -121,6 +147,38 @@
     <servlet-mapping>
         <servlet-name>Upload</servlet-name>
         <url-pattern>/Upload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProfiloUtente</servlet-name>
+        <url-pattern>/ProfiloUtente</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageGroup</servlet-name>
+        <url-pattern>/ManageGroup</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteUsers</servlet-name>
+        <url-pattern>/DeleteUsers</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditGroup</servlet-name>
+        <url-pattern>/EditGroup</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PDFCouponServlet</servlet-name>
+        <url-pattern>/PDFCouponServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PdfWriter</servlet-name>
+        <url-pattern>/PdfWriter</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PdfWriter1</servlet-name>
+        <url-pattern>/PdfWriter1</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Viewer</servlet-name>
+        <url-pattern>/Viewer</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

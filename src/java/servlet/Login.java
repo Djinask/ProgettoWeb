@@ -136,7 +136,7 @@ public class Login extends HttpServlet {
         // out.println("<HTML><head><link href=\"./././web/css/bootstrap.min.css\" rel=\"stylesheet\"><title>Wellcome!</title><body><H1>");
         PrintWriter out = response.getWriter();
 
-        out.println("<HTML><head><link href=\"css/bootstrap.min.css\" rel=\"stylesheet\"><title>Wellcome!</title><body><H1></H1>");
+        out.println("<HTML><head><link href=\"css/bootstrap.css\" rel=\"stylesheet\"><title>Wellcome!</title><body><H1></H1>");
             
         Users user = null;
         try {
@@ -152,6 +152,7 @@ public class Login extends HttpServlet {
             // out.println("</H1></body></HTML>");
             HttpSession session;
             session = request.getSession(true);
+            
 
             session.setAttribute("user", user);
             response.sendRedirect("LoggedHome");

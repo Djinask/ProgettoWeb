@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package servlet;
 
 import DB.DBManager;
@@ -25,8 +26,9 @@ import javax.servlet.http.HttpSession;
  *
  * @author djinask
  */
-public class Invita extends HttpServlet {
+public class DeleteUsers extends HttpServlet {
 
+   
     private DBManager manager;
     int id_gruppo;
     Users user;
@@ -61,6 +63,7 @@ public class Invita extends HttpServlet {
         } else {
             user = (Users) session.getAttribute("user");
             id_gruppo = Integer.parseInt(request.getParameter("id_group"));
+            System.out.println("id_gr =" + id_gruppo);
 
             response.setContentType("text/html;charset=UTF-8");
 
@@ -82,15 +85,16 @@ public class Invita extends HttpServlet {
 
                 out.println("</div>");
                 out.println("<legend>Seleziona gli utenti che vuoi invitare al gruppo:</leged>");
-                out.println("<form class=\"navbar-form navbar-left\"action=\"Invita\" method=\"post\">");
+                out.println("<form class=\"navbar-form navbar-left\"action=\"DeleteUsers\" method=\"post\">");
 
                 out.println("<ul class=\"list-group\">");
 
-                List<Users> utenti = (ArrayList) manager.getUsers(user, id_gruppo);
+                List<Users> utenti = (ArrayList) manager.getUsersGroup(user, id_gruppo, false);
+                
                 if (utenti != null) {
                     for (int i = 0; i < utenti.size(); i++) {
                         out.println("<li class=\"list-group-item\">"
-                                + "<input type=\"checkbox\" name=\"inviti\" value=\"" + utenti.get(i).getId() + "\"/>"
+                                + "<input type=\"checkbox\" name=\"rimossi\" value=\"" + utenti.get(i).getId() + "\"/>"
                                 + " Nome: " + utenti.get(i).getName()
                                 + "           Mail:" + utenti.get(i).getmail()
                                 + " </li>"
@@ -102,7 +106,7 @@ public class Invita extends HttpServlet {
                 }
 
                 out.println("</ul>");
-                out.println("<button  class=\"btn btn-default btn-lg\" type=\"submit\">Conferma inviti</button>");
+                out.println("<button  class=\"btn btn-default btn-lg\" type=\"submit\">Conferma Eliminati</button>");
 
                 out.println("</form>");
                 out.println("</body>");
@@ -126,7 +130,7 @@ public class Invita extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
-        String[] inviti = request.getParameterValues("inviti");
+        String[] rimossi = request.getParameterValues("rimossi");
         Boolean invitati = false;
         PrintWriter out = response.getWriter();
         out.println("<!DOCTYPE html>");
@@ -136,8 +140,9 @@ public class Invita extends HttpServlet {
         out.println("<title>Gruppi utente</title>");
         out.println("</head>");
         out.println("<body>");
+        System.out.println("id_gr =" + id_gruppo);
         try {
-            invitati = this.manager.AddInviti(id_gruppo, user, inviti);
+            invitati = this.manager.DeleteUsers(id_gruppo, user, rimossi);
 
         } catch (SQLException ex) {
             Logger.getLogger(Invita.class.getName()).log(Level.SEVERE, null, ex);
@@ -145,7 +150,7 @@ public class Invita extends HttpServlet {
         if (invitati) {
         response.sendRedirect(request.getContextPath() + "/LoggedHome");
         } else {
-            out.println("Non Inseriti");
+            out.println("Non Eliminati");
 
         }
                     
@@ -164,5 +169,4 @@ public class Invita extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }

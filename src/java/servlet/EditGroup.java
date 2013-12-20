@@ -11,6 +11,8 @@ import DB.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,10 +23,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author djinask
  */
-public class CreaGruppo extends HttpServlet {
-
-    private DBManager manager;
-    private Users user;
+public class EditGroup extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -35,41 +34,25 @@ public class CreaGruppo extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    private DBManager manager;
+
+    Users user = null;
+    int group_id;
+    HttpSession session;
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        user = (Users) session.getAttribute("user");
-        response.setContentType("text/html;charset=UTF-8");
-        user = (Users) session.getAttribute("user");
 
+        response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
-            out.println("<head><link href=\"css/bootstrap.css\" rel=\"stylesheet\">");
-            out.println("<link href=\"css/bootstrap-theme.css\" rel=\"stylesheet\">");
-            out.println("<title>Servlet CreaGruppo</title>");
+            out.println("<head>");
+            out.println("<title>Servlet EditGroup</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<ul class=\"nav nav-tabs\">\n"
-                        + "  <li><a href=\"LoggedHome\">Home</a></li>\n"
-                        + "  <li><a href=\"ProfiloUtente\">Profile</a></li>\n"
-                        + "  <li style=\"float:right;position:relative;margin-right:1em;\"><a href=\"Logout\">Logout</a></li>\n"
-                        + "</ul>");
-            out.println("<div class=\"jumbotron\">");
-            out.println("<h1>Nuovo Gruppo</h1>");
-
-            out.println("</div>");
-            out.println("<form class=\"navbar-form navbar-left\" action=\"CreaGruppo\" method=\"post\">");
-            out.println("<input type=\"text\" name=\"group_name\" class=\"form-control\" placeholder=\"Nome Gruppo\">");
-            out.println("<br>");
-            out.println("<input type=\"text\" name=\"thread\" class=\"form-control\" placeholder=\"Thread\">");
-            out.println("<br>");
-
-            out.println("<br>");
-            out.println("<button  class=\"btn btn-default btn-lg btn-primary\" type=\"submit\">Crea</button>");
-            out.println("<br>");
-            out.println("</form>");
+            out.println("<h1>Servlet EditGroup at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -87,7 +70,7 @@ public class CreaGruppo extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
     }
 
     /**
@@ -101,31 +84,26 @@ public class CreaGruppo extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //processRequest(request, response);
-        HttpSession session = request.getSession(false);
+        session = request.getSession(false);
+
+        user = (Users) session.getAttribute("user");
         this.manager = (DBManager) super.getServletContext().getAttribute("dbmanager");
-        String GroupName = request.getParameter("group_name");
-        String GroupThread = request.getParameter("thread");
-        Users user = (Users) session.getAttribute("user");
-        if (GroupName == null) {
-            processRequest(request, response);
-        }
-        Groups group = new Groups();
-        group.setGroupName(GroupName);
-        group.setOwner(user.getName());
-        group.setThread(GroupThread);
-        
 
-        try {
-
-            Boolean added = new Boolean(false);
-            added = manager.AddGroup(group, user);
-
-        } catch (SQLException ex) {
-            throw new ServletException(ex);
+        String new_name = null;
+        String new_thread = null;
+        new_name = request.getParameter("group_name");
+        new_thread = request.getParameter("thread");
+        group_id = Integer.parseInt(request.getParameter("group_id"));
+       
+        if (new_name != null || new_thread != null) {
+            try {
+                this.manager.editGroup(group_id, new_name, new_thread, user);
+            } catch (SQLException ex) {
+                Logger.getLogger(Gruppo.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
         }
-        response.sendRedirect(request.getContextPath() + "/LoggedHome");
+        response.sendRedirect(request.getContextPath() + "/Gruppo");
     }
 
     /**
